@@ -34,9 +34,13 @@ export const Header = ({
   const isAdmin = location.pathname.startsWith('/admin');
 
   useEffect(() => {
-    const loadCategories = () => {
-      const allCategories = CategoryStorage.getAll();
-      setCategories(allCategories);
+    const loadCategories = async () => {
+      try {
+        const allCategories = await CategoryStorage.getAll();
+        setCategories(allCategories);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
     };
     loadCategories();
   }, []);

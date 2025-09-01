@@ -48,21 +48,33 @@ export const AdminPage = () => {
   });
 
   useEffect(() => {
-    loadGames();
-    loadCategories();
+    const loadData = async () => {
+      await Promise.all([loadGames(), loadCategories()]);
+    };
+    loadData();
   }, []);
 
-  const loadGames = () => {
-    const allGames = GameStorage.getAll();
-    setGames(allGames);
+  const loadGames = async () => {
+    try {
+      const allGames = await GameStorage.getAll();
+      setGames(allGames);
+    } catch (error) {
+      console.error('Error loading games:', error);
+      toast.error('Грешка при зареждане на игрите');
+    }
   };
 
-  const loadCategories = () => {
-    const allCategories = CategoryStorage.getAll();
-    setCategories(allCategories);
+  const loadCategories = async () => {
+    try {
+      const allCategories = await CategoryStorage.getAll();
+      setCategories(allCategories);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      toast.error('Грешка при зареждане на категориите');
+    }
   };
 
-  const handleSaveGame = () => {
+  const handleSaveGame = async () => {
     if (!formData.title || !formData.description || !formData.url || !formData.category || !formData.thumb) {
       toast.error('Моля попълнете всички задължителни полета');
       return;
@@ -81,24 +93,39 @@ export const AdminPage = () => {
       height: formData.height || '600'
     };
 
-    if (editingGame) {
-      GameStorage.update(editingGame.id, gameData);
-      toast.success('Играта е обновена успешно');
-    } else {
-      GameStorage.add(gameData);
-      toast.success('Играта е добавена успешно');
+    try {
+      if (editingGame) {
+        await GameStorage.update(editingGame.id, gameData);
+        toast.success('Играта е обновена успешно');
+      } else {
+        await GameStorage.add(gameData);
+        toast.success('Играта е добавена успешно');
+      }
+      
+      resetForm();
+      await loadGames();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error saving game:', error);
+      toast.error('Грешка при запазване на играта');
     }
 
-    resetForm();
-    loadGames();
-    setIsDialogOpen(false);
   };
 
-  const handleDeleteGame = (id: string) => {
+  const handleDeleteGame = async (id: string) => {
     if (window.confirm('Сигурни ли сте, че искате да изтриете тази игра?')) {
-      GameStorage.delete(id);
-      toast.success('Играта е изтрита успешно');
-      loadGames();
+      try {
+        const success = await GameStorage.delete(id);
+        if (success) {
+          toast.success('Играта е изтрита успешно');
+          await loadGames();
+        } else {
+          toast.error('Грешка при изтриване на играта');
+        }
+      } catch (error) {
+        console.error('Error deleting game:', error);
+        toast.error('Грешка при изтриване на играта');
+      }
     }
   };
 
@@ -123,7 +150,7 @@ export const AdminPage = () => {
     });
   };
 
-  const handleBulkImport = () => {
+  const handleBulkImport = async () => {
     try {
       const importedGames = JSON.parse(bulkImportData);
       if (!Array.isArray(importedGames)) {
@@ -132,16 +159,21 @@ export const AdminPage = () => {
 
       // Validate each game has required fields
       for (const game of importedGames) {
-        if (!game.id || !game.title || !game.url || !game.thumb) {
-          throw new Error('Всяка игра трябва да има id, title, url и thumb');
+        if (!game.title || !game.url || !game.thumb) {
+          throw new Error('Всяка игра трябва да има title, url и thumb');
         }
       }
 
-      GameStorage.bulkImport(importedGames);
-      toast.success(`Успешно импортирани ${importedGames.length} игри`);
-      setBulkImportData('');
-      loadGames();
+      const success = await GameStorage.bulkImport(importedGames);
+      if (success) {
+        toast.success(`Успешно импортирани ${importedGames.length} игри`);
+        setBulkImportData('');
+        await loadGames();
+      } else {
+        toast.error('Грешка при импортиране на игрите');
+      }
     } catch (error) {
+      console.error('Error importing games:', error);
       toast.error('Грешка при импортиране: ' + (error as Error).message);
     }
   };
@@ -158,34 +190,38 @@ export const AdminPage = () => {
     toast.success('Данните са експортирани');
   };
 
-  const handleSaveCategory = () => {
+  const handleSaveCategory = async () => {
     if (!newCategoryName.trim()) {
       toast.error('Моля въведете име на категория');
       return;
     }
 
-    if (editingCategory) {
-      // Update existing category
-      CategoryStorage.update(editingCategory, newCategoryName);
-      // Update all games with old category name to new name
-      const updatedGames = games.map(game => 
-        game.category === editingCategory 
-          ? { ...game, category: newCategoryName }
-          : game
-      );
-      updatedGames.forEach(game => GameStorage.update(game.id, game));
-      toast.success('Категорията е обновена успешно');
-    } else {
-      // Add new category
-      CategoryStorage.add(newCategoryName);
-      toast.success('Категорията е добавена успешно');
+    try {
+      if (editingCategory) {
+        // Update existing category
+        const success = await CategoryStorage.update(editingCategory, newCategoryName);
+        if (success) {
+          toast.success('Категорията е обновена успешно');
+        } else {
+          toast.error('Грешка при обновяване на категорията');
+          return;
+        }
+      } else {
+        // Add new category
+        await CategoryStorage.add(newCategoryName);
+        toast.success('Категорията е добавена успешно');
+      }
+      
+      await loadCategories();
+      await loadGames();
+      setIsCategoryDialogOpen(false);
+      setNewCategoryName('');
+      setEditingCategory(null);
+    } catch (error) {
+      console.error('Error saving category:', error);
+      toast.error('Грешка при запазване на категорията: ' + (error as Error).message);
     }
 
-    loadCategories();
-    loadGames();
-    setIsCategoryDialogOpen(false);
-    setNewCategoryName('');
-    setEditingCategory(null);
   };
 
   const handleEditCategory = (category: string) => {
@@ -194,7 +230,7 @@ export const AdminPage = () => {
     setIsCategoryDialogOpen(true);
   };
 
-  const handleDeleteCategory = (category: string) => {
+  const handleDeleteCategory = async (category: string) => {
     const gamesInCategory = games.filter(g => g.category === category).length;
     if (gamesInCategory > 0) {
       toast.error(`Не можете да изтриете категория с ${gamesInCategory} игри`);
@@ -202,9 +238,14 @@ export const AdminPage = () => {
     }
 
     if (window.confirm(`Сигурни ли сте, че искате да изтриете категорията "${category}"?`)) {
-      CategoryStorage.delete(category);
-      toast.success('Категорията е изтрита успешно');
-      loadCategories();
+      try {
+        await CategoryStorage.delete(category);
+        toast.success('Категорията е изтрита успешно');
+        await loadCategories();
+      } catch (error) {
+        console.error('Error deleting category:', error);
+        toast.error('Грешка при изтриване на категорията: ' + (error as Error).message);
+      }
     }
   };
 

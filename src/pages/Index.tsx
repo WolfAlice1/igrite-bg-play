@@ -27,80 +27,101 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load games and categories from storage
-    const storedGames = GameStorage.getAll();
-    const storedCategories = CategoryStorage.getAll();
-    
-    setCategories(storedCategories);
-    
-    // If no games exist, add some sample games for demonstration
-    if (storedGames.length === 0) {
-      const sampleGames: Game[] = [
-        {
-          id: "1",
-          title: "2048 Пъзел",
-          description: "Класическата числова игра 2048. Съединявайте плочки с еднакви числа, за да достигнете до 2048!",
-          instructions: "Използвайте стрелките на клавиатурата или докоснете за движение",
-          url: "https://html5.gamemonetize.com/2048game/",
-          category: "Puzzle",
-          tags: "numbers, puzzle, logic, strategy",
-          thumb: "https://img.gamemonetize.com/2048game/512x384.jpg",
-          width: "800",
-          height: "600"
-        },
-        {
-          id: "2", 
-          title: "Змия Класик",
-          description: "Класическата игра Змия в модерен HTML5 дизайн. Яжте ябълки и растете, но не се удряйте в стените!",
-          instructions: "Използвайте стрелките или WASD за управление",
-          url: "https://html5.gamemonetize.com/snakegame/",
-          category: "Arcade",
-          tags: "classic, retro, snake, arcade",
-          thumb: "https://img.gamemonetize.com/snakegame/512x384.jpg",
-          width: "800",
-          height: "600"
-        },
-        {
-          id: "3",
-          title: "Тетрис Майстор",
-          description: "Легендарната игра Тетрис с модерна графика. Подреждайте падащите блокчета и образувайте линии!",
-          instructions: "Стрелки за движение, Space за завъртане",
-          url: "https://html5.gamemonetize.com/tetris/",
-          category: "Puzzle", 
-          tags: "tetris, blocks, puzzle, classic",
-          thumb: "https://img.gamemonetize.com/tetris/512x384.jpg",
-          width: "800",
-          height: "600"
+    const loadData = async () => {
+      try {
+        // Load games and categories from MongoDB
+        const [storedGames, storedCategories] = await Promise.all([
+          GameStorage.getAll(),
+          CategoryStorage.getAll()
+        ]);
+        
+        setCategories(storedCategories);
+        
+        // If no games exist, add some sample games for demonstration
+        if (storedGames.length === 0) {
+          const sampleGames: Game[] = [
+            {
+              id: "1",
+              title: "2048 Пъзел",
+              description: "Класическата числова игра 2048. Съединявайте плочки с еднакви числа, за да достигнете до 2048!",
+              instructions: "Използвайте стрелките на клавиатурата или докоснете за движение",
+              url: "https://html5.gamemonetize.com/2048game/",
+              category: "Puzzle",
+              tags: "numbers, puzzle, logic, strategy",
+              thumb: "https://img.gamemonetize.com/2048game/512x384.jpg",
+              width: "800",
+              height: "600"
+            },
+            {
+              id: "2", 
+              title: "Змия Класик",
+              description: "Класическата игра Змия в модерен HTML5 дизайн. Яжте ябълки и растете, но не се удряйте в стените!",
+              instructions: "Използвайте стрелките или WASD за управление",
+              url: "https://html5.gamemonetize.com/snakegame/",
+              category: "Arcade",
+              tags: "classic, retro, snake, arcade",
+              thumb: "https://img.gamemonetize.com/snakegame/512x384.jpg",
+              width: "800",
+              height: "600"
+            },
+            {
+              id: "3",
+              title: "Тетрис Майстор",
+              description: "Легендарната игра Тетрис с модерна графика. Подреждайте падащите блокчета и образувайте линии!",
+              instructions: "Стрелки за движение, Space за завъртане",
+              url: "https://html5.gamemonetize.com/tetris/",
+              category: "Puzzle", 
+              tags: "tetris, blocks, puzzle, classic",
+              thumb: "https://img.gamemonetize.com/tetris/512x384.jpg",
+              width: "800",
+              height: "600"
+            }
+          ];
+          
+          await GameStorage.bulkImport(sampleGames);
+          const updatedGames = await GameStorage.getAll();
+          setGames(updatedGames);
+          setFilteredGames(updatedGames);
+        } else {
+          setGames(storedGames);
+          setFilteredGames(storedGames);
         }
-      ];
-      
-      GameStorage.bulkImport(sampleGames);
-      setGames(sampleGames);
-      setFilteredGames(sampleGames);
-    } else {
-      setGames(storedGames);
-      setFilteredGames(storedGames);
-    }
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    setLoading(false);
+    loadData();
   }, []);
 
   useEffect(() => {
-    let filtered = games;
+    const filterGames = async () => {
+      let filtered = games;
 
-    // Apply search filter
-    if (searchQuery) {
-      filtered = GameStorage.search(searchQuery);
-    }
+      // Apply search filter
+      if (searchQuery) {
+        filtered = await GameStorage.search(searchQuery);
+      }
 
-    // Apply category filter
-    if (selectedCategory) {
-      filtered = filtered.filter(game => 
-        game.category.toLowerCase() === selectedCategory.toLowerCase()
-      );
-    }
+      // Apply category filter
+      if (selectedCategory) {
+        if (searchQuery) {
+          // If we have both search and category, filter the search results
+          filtered = filtered.filter(game => 
+            game.category.toLowerCase() === selectedCategory.toLowerCase()
+          );
+        } else {
+          // If only category filter, get games by category
+          filtered = await GameStorage.getByCategory(selectedCategory);
+        }
+      }
 
-    setFilteredGames(filtered);
+      setFilteredGames(filtered);
+    };
+    
+    filterGames();
   }, [games, searchQuery, selectedCategory]);
 
   // Update page title and meta for SEO

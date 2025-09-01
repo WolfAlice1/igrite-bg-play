@@ -1,67 +1,145 @@
 import { Game } from '@/types/game';
 
-const GAMES_STORAGE_KEY = 'igrite-games';
+const API_BASE_URL = 'http://localhost:3001/api';
 
 export class GameStorage {
-  static getAll(): Game[] {
-    const stored = localStorage.getItem(GAMES_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  }
-
-  static save(games: Game[]): void {
-    localStorage.setItem(GAMES_STORAGE_KEY, JSON.stringify(games));
-  }
-
-  static add(game: Game): void {
-    const games = this.getAll();
-    games.push(game);
-    this.save(games);
-  }
-
-  static update(id: string, updatedGame: Game): void {
-    const games = this.getAll();
-    const index = games.findIndex(g => g.id === id);
-    if (index !== -1) {
-      games[index] = updatedGame;
-      this.save(games);
+  static async getAll(): Promise<Game[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/games`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch games');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching games:', error);
+      return [];
     }
   }
 
-  static delete(id: string): void {
-    const games = this.getAll();
-    const filtered = games.filter(g => g.id !== id);
-    this.save(filtered);
+  static async save(games: Game[]): Promise<void> {
+    // This method is not needed with MongoDB as we save individually
+    console.warn('save() method is deprecated with MongoDB backend');
   }
 
-  static getById(id: string): Game | undefined {
-    const games = this.getAll();
-    return games.find(g => g.id === id);
+  static async add(game: Game): Promise<Game | null> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/games`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(game),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to add game');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding game:', error);
+      return null;
+    }
   }
 
-  static bulkImport(games: Game[]): void {
-    const existing = this.getAll();
-    const existingIds = new Set(existing.map(g => g.id));
-    
-    const newGames = games.filter(g => !existingIds.has(g.id));
-    const allGames = [...existing, ...newGames];
-    
-    this.save(allGames);
+  static async update(id: string, updatedGame: Game): Promise<Game | null> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/games/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedGame),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update game');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating game:', error);
+      return null;
+    }
   }
 
-  static getByCategory(category: string): Game[] {
-    const games = this.getAll();
-    return games.filter(g => g.category.toLowerCase() === category.toLowerCase());
+  static async delete(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/games/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete game');
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting game:', error);
+      return false;
+    }
   }
 
-  static search(query: string): Game[] {
-    const games = this.getAll();
-    const searchTerm = query.toLowerCase();
-    
-    return games.filter(g => 
-      g.title.toLowerCase().includes(searchTerm) ||
-      g.description.toLowerCase().includes(searchTerm) ||
-      g.category.toLowerCase().includes(searchTerm) ||
-      g.tags.toLowerCase().includes(searchTerm)
-    );
+  static async getById(id: string): Promise<Game | undefined> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/games/${id}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return undefined;
+        }
+        throw new Error('Failed to fetch game');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching game by id:', error);
+      return undefined;
+    }
+  }
+
+  static async bulkImport(games: Game[]): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/games/bulk-import`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(games),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to bulk import games');
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error bulk importing games:', error);
+      return false;
+    }
+  }
+
+  static async getByCategory(category: string): Promise<Game[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/games/category/${encodeURIComponent(category)}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch games by category');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching games by category:', error);
+      return [];
+    }
+  }
+
+  static async search(query: string): Promise<Game[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/games/search/${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        throw new Error('Failed to search games');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error searching games:', error);
+      return [];
+    }
   }
 }
