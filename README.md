@@ -1,73 +1,122 @@
-# Welcome to your Lovable project
+# игрите.bg - Безплатни HTML Игри
 
-## Project info
+Модерен уебсайт за HTML игри, насочен към българската аудитория, с красив дизайн и пълнофункционален админ панел.
 
-**URL**: https://lovable.dev/projects/c6b106e1-898a-4b57-b28c-59cfa7d9679a
+## ✨ Функции
 
-## How can I edit this code?
+- 🎮 **Модерен дизайн** - Dark theme с purple/blue градиенти
+- 🎯 **Категории игри** - Action, Puzzle, Racing, Arcade и др.
+- 🔍 **Търсене и филтри** - Лесно намиране на игри
+- 👨‍💼 **Админ панел** - CRUD операции за игри
+- 📱 **Responsive дизайн** - Работи на всички устройства
+- 🚀 **SEO оптимизиран** - Bulgarian meta tags и structured data
+- 💾 **JSON persistence** - Няма нужда от база данни
+- 📦 **Bulk import** - Масово добавяне на игри от JSON
 
-There are several ways of editing your application.
+## 🚀 Стартиране
 
-**Use Lovable**
+```bash
+# Клониране на проекта
+git clone <PROJECT_URL>
+cd igrite-bg
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c6b106e1-898a-4b57-b28c-59cfa7d9679a) and start prompting.
+# Инсталиране на dependencies
+npm install
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Стартиране в development mode
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Сайтът ще бъде достъпен на `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📁 Структура на проекта
 
-**Use GitHub Codespaces**
+```
+src/
+├── components/          # React компоненти
+│   ├── GameCard.tsx     # Карта за игра
+│   ├── GameGrid.tsx     # Мрежа от игри
+│   └── Header.tsx       # Хедър с търсене и навигация
+├── pages/               # Страници
+│   ├── Index.tsx        # Главна страница
+│   ├── GamePage.tsx     # Страница за игра
+│   └── AdminPage.tsx    # Админ панел
+├── types/               # TypeScript типове
+│   └── game.ts          # Game интерфейс
+├── utils/               # Utility функции
+│   └── gameStorage.ts   # JSON storage логика
+└── index.css           # Design system
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🎮 Как да добавите игри
 
-## What technologies are used for this project?
+### Чрез админ панел:
+1. Отидете на `/admin`
+2. Кликнете "Добави игра"
+3. Попълнете формата
+4. Натиснете "Запазване"
 
-This project is built with:
+### Bulk import:
+1. Отидете на `/admin` → "Импорт"
+2. Поставете JSON в следния формат:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```json
+[
+  {
+    "id": "1",
+    "title": "Име на играта",
+    "description": "Описание...",
+    "instructions": "Инструкции...",
+    "url": "https://iframe-url.com",
+    "category": "Action",
+    "tags": "tag1, tag2, tag3",
+    "thumb": "https://image-url.jpg",
+    "width": "800",
+    "height": "600"
+  }
+]
+```
 
-## How can I deploy this project?
+## 🛠️ Технологии
 
-Simply open [Lovable](https://lovable.dev/projects/c6b106e1-898a-4b57-b28c-59cfa7d9679a) and click on Share -> Publish.
+- **React 18** - UI библиотека
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **Framer Motion** - Анимации
+- **Vite** - Build tool
+- **shadcn/ui** - UI компоненти
+- **React Router** - Routing
+- **Sonner** - Toast notifications
 
-## Can I connect a custom domain to my Lovable project?
+## 🎨 Design System
 
-Yes, you can!
+Уебсайтът използва тъмна тема с:
+- **Primary colors**: Purple/Blue градиенти
+- **Typography**: Inter font family
+- **Animations**: Smooth transitions и hover effects
+- **Components**: Модерни UI компоненти с glass morphism
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📱 SEO Функции
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Bulgarian language meta tags
+- Open Graph optimizations
+- Twitter Cards
+- Structured Data (JSON-LD)
+- Canonical URLs
+- Responsive meta viewport
+
+## 🚧 Deployment
+
+```bash
+# Build за production
+npm run build
+
+# Preview на build
+npm run preview
+```
+
+Build файловете ще бъдат в `dist/` директорията.
+
+## 📝 License
+
+Този проект е създаден за образователни цели.
