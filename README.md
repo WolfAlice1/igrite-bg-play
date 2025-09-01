@@ -23,11 +23,35 @@ cd igrite-bg
 # Инсталиране на dependencies
 npm install
 
-# Стартиране в development mode
+# Стартиране на MongoDB (трябва да е инсталиран локално)
+mongod
+
+# Стартиране в development mode (frontend + backend)
+npm run dev:full
+
+# Или стартиране поотделно:
+# Backend server
+npm run dev:server
+
+# Frontend (в друг терминал)
 npm run dev
 ```
 
-Сайтът ще бъде достъпен на `http://localhost:8080`
+- Frontend: `http://localhost:8080`
+- Backend API: `http://localhost:3001`
+
+## 📊 База данни
+
+Проектът използва MongoDB за съхранение на данни:
+
+- **games** колекция - съхранява всички игри
+- **categories** колекция - съхранява категориите
+
+### MongoDB Setup
+
+1. Инсталирайте MongoDB локално или използвайте MongoDB Atlas
+2. Обновете `MONGODB_URI` в `.env` файла
+3. Сървърът автоматично ще създаде нужните колекции и индекси
 
 ## 📁 Структура на проекта
 
@@ -44,7 +68,11 @@ src/
 ├── types/               # TypeScript типове
 │   └── game.ts          # Game интерфейс
 ├── utils/               # Utility функции
-│   └── gameStorage.ts   # JSON storage логика
+│   ├── gameStorage.ts   # MongoDB API клиент за игри
+│   └── categoryStorage.ts # MongoDB API клиент за категории
+server/                  # Backend API
+├── index.ts            # Express сървър с MongoDB
+└── package.json        # Backend dependencies
 └── index.css           # Design system
 ```
 
@@ -79,6 +107,7 @@ src/
 
 ## 🛠️ Технологии
 
+### Frontend
 - **React 18** - UI библиотека
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
@@ -87,6 +116,12 @@ src/
 - **shadcn/ui** - UI компоненти
 - **React Router** - Routing
 - **Sonner** - Toast notifications
+
+### Backend
+- **Express.js** - Web framework
+- **MongoDB** - NoSQL база данни
+- **TypeScript** - Type safety
+- **CORS** - Cross-origin requests
 
 ## 🎨 Design System
 
