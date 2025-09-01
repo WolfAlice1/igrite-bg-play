@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { GAME_CATEGORIES } from '@/types/game';
+import { CategoryStorage } from '@/utils/categoryStorage';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface HeaderProps {
@@ -27,10 +27,19 @@ export const Header = ({
   onCategoryChange 
 }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
 
   const isAdmin = location.pathname.startsWith('/admin');
+
+  useEffect(() => {
+    const loadCategories = () => {
+      const allCategories = CategoryStorage.getAll();
+      setCategories(allCategories);
+    };
+    loadCategories();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 glass-morphism border-b border-border/20">
@@ -76,7 +85,7 @@ export const Header = ({
                     >
                       Всички
                     </Badge>
-                    {GAME_CATEGORIES.slice(0, 4).map((category) => (
+                    {categories.slice(0, 4).map((category) => (
                       <Badge
                         key={category}
                         variant={selectedCategory === category ? "default" : "secondary"}
@@ -154,7 +163,7 @@ export const Header = ({
                 >
                   Всички
                 </Badge>
-                {GAME_CATEGORIES.map((category) => (
+                {categories.map((category) => (
                   <Badge
                     key={category}
                     variant={selectedCategory === category ? "default" : "secondary"}

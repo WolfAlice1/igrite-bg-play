@@ -17,16 +17,5 @@ export interface GameCategory {
   count: number;
 }
 
-export const GAME_CATEGORIES = [
-  "Action",
-  "Adventure", 
-  "Arcade",
-  "Fighting",
-  "Puzzle",
-  "Racing",
-  "Shooting",
-  "Sports",
-  "Strategy"
-] as const;
-
-export type GameCategoryType = typeof GAME_CATEGORIES[number];
+// Categories are now dynamic and managed through CategoryStorage
+export type GameCategoryType = string;

@@ -21,14 +21,18 @@ import {
   FileText 
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { GAME_CATEGORIES } from '@/types/game';
+import { CategoryStorage } from '@/utils/categoryStorage';
 
 export const AdminPage = () => {
   const [games, setGames] = useState<Game[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [editingGame, setEditingGame] = useState<Game | null>(null);
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [bulkImportData, setBulkImportData] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   // Form states
   const [formData, setFormData] = useState<Partial<Game>>({
@@ -45,11 +49,17 @@ export const AdminPage = () => {
 
   useEffect(() => {
     loadGames();
+    loadCategories();
   }, []);
 
   const loadGames = () => {
     const allGames = GameStorage.getAll();
     setGames(allGames);
+  };
+
+  const loadCategories = () => {
+    const allCategories = CategoryStorage.getAll();
+    setCategories(allCategories);
   };
 
   const handleSaveGame = () => {
@@ -148,6 +158,56 @@ export const AdminPage = () => {
     toast.success('Данните са експортирани');
   };
 
+  const handleSaveCategory = () => {
+    if (!newCategoryName.trim()) {
+      toast.error('Моля въведете име на категория');
+      return;
+    }
+
+    if (editingCategory) {
+      // Update existing category
+      CategoryStorage.update(editingCategory, newCategoryName);
+      // Update all games with old category name to new name
+      const updatedGames = games.map(game => 
+        game.category === editingCategory 
+          ? { ...game, category: newCategoryName }
+          : game
+      );
+      updatedGames.forEach(game => GameStorage.update(game.id, game));
+      toast.success('Категорията е обновена успешно');
+    } else {
+      // Add new category
+      CategoryStorage.add(newCategoryName);
+      toast.success('Категорията е добавена успешно');
+    }
+
+    loadCategories();
+    loadGames();
+    setIsCategoryDialogOpen(false);
+    setNewCategoryName('');
+    setEditingCategory(null);
+  };
+
+  const handleEditCategory = (category: string) => {
+    setEditingCategory(category);
+    setNewCategoryName(category);
+    setIsCategoryDialogOpen(true);
+  };
+
+  const handleDeleteCategory = (category: string) => {
+    const gamesInCategory = games.filter(g => g.category === category).length;
+    if (gamesInCategory > 0) {
+      toast.error(`Не можете да изтриете категория с ${gamesInCategory} игри`);
+      return;
+    }
+
+    if (window.confirm(`Сигурни ли сте, че искате да изтриете категорията "${category}"?`)) {
+      CategoryStorage.delete(category);
+      toast.success('Категорията е изтрита успешно');
+      loadCategories();
+    }
+  };
+
   const filteredGames = games.filter(game => 
     game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     game.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -162,8 +222,9 @@ export const AdminPage = () => {
         </div>
 
         <Tabs defaultValue="games" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-4 max-w-2xl">
             <TabsTrigger value="games">Игри ({games.length})</TabsTrigger>
+            <TabsTrigger value="categories">Категории ({categories.length})</TabsTrigger>
             <TabsTrigger value="import">Импорт</TabsTrigger>
             <TabsTrigger value="export">Експорт</TabsTrigger>
           </TabsList>
@@ -212,7 +273,7 @@ export const AdminPage = () => {
                             <SelectValue placeholder="Изберете категория" />
                           </SelectTrigger>
                           <SelectContent>
-                            {GAME_CATEGORIES.map((category) => (
+                            {categories.map((category) => (
                               <SelectItem key={category} value={category}>
                                 {category}
                               </SelectItem>
@@ -352,6 +413,88 @@ export const AdminPage = () => {
                             </Button>
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Categories Management */}
+          <TabsContent value="categories" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Управление на категории</h3>
+              <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    onClick={() => {
+                      setEditingCategory(null);
+                      setNewCategoryName('');
+                    }} 
+                    className="gradient-primary"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Добави категория
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingCategory ? 'Редактиране на категория' : 'Добавяне на нова категория'}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium">Име на категория</label>
+                      <Input
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        placeholder="Въведете име на категория"
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" onClick={() => setIsCategoryDialogOpen(false)}>
+                        <X className="mr-2 h-4 w-4" />
+                        Отказ
+                      </Button>
+                      <Button onClick={handleSaveCategory} className="gradient-primary">
+                        <Save className="mr-2 h-4 w-4" />
+                        Запазване
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid gap-4">
+              {categories.map((category) => (
+                <Card key={category} className="glass-morphism">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <h4 className="font-semibold">{category}</h4>
+                        <Badge variant="secondary">
+                          {games.filter(g => g.category === category).length} игри
+                        </Badge>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditCategory(category)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteCategory(category)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>

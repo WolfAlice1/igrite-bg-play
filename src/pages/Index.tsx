@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Game, GAME_CATEGORIES } from '@/types/game';
+import { Game } from '@/types/game';
 import { GameStorage } from '@/utils/gameStorage';
+import { CategoryStorage } from '@/utils/categoryStorage';
 import { Header } from '@/components/Header';
 import { GameGrid } from '@/components/GameGrid';
 import { Button } from '@/components/ui/button';
@@ -19,14 +20,18 @@ import { motion } from 'framer-motion';
 
 const Index = () => {
   const [games, setGames] = useState<Game[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load games from storage
+    // Load games and categories from storage
     const storedGames = GameStorage.getAll();
+    const storedCategories = CategoryStorage.getAll();
+    
+    setCategories(storedCategories);
     
     // If no games exist, add some sample games for demonstration
     if (storedGames.length === 0) {
@@ -110,7 +115,7 @@ const Index = () => {
     }
   }, []);
 
-  const categoryStats = GAME_CATEGORIES.map(category => ({
+  const categoryStats = categories.map(category => ({
     name: category,
     count: games.filter(game => game.category === category).length
   })).filter(stat => stat.count > 0);
