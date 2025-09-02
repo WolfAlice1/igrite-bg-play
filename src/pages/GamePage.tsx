@@ -23,26 +23,43 @@ export const GamePage = () => {
   const [iframeLoaded, setIframeLoaded] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      const foundGame = GameStorage.getById(id);
-      if (foundGame) {
-        setGame(foundGame);
-        // Update page title and meta for SEO
-        document.title = `${foundGame.title} - игрите.bg`;
-        
-        // Update meta description
-        const metaDescription = document.querySelector('meta[name="description"]');
-        if (metaDescription) {
-          metaDescription.setAttribute('content', 
-            `Играй ${foundGame.title} безплатно онлайн. ${foundGame.description.slice(0, 120)}...`
-          );
+    const loadGame = async () => {
+      if (id) {
+        try {
+          const foundGame = await GameStorage.getById(id);
+          if (foundGame) {
+            setGame(foundGame);
+            // Update page title and meta for SEO
+            document.title = `${foundGame.title} - игрите.bg`;
+            
+            // Update meta description
+            const metaDescription = document.querySelector('meta[name="description"]');
+            if (metaDescription) {
+              metaDescription.setAttribute('content', 
+                `Играй ${foundGame.title} безплатно онлайн. ${foundGame.description.slice(0, 120)}...`
+              );
+            }
+          } else {
+            toast.error('Играта не е намерена');
+            navigate('/');
+          }
+        } catch (error) {
+          console.error('Error loading game:', error);
+          // Fallback to localStorage
+          const localGames = GameStorage.getAllLocal();
+          const foundGame = localGames.find(g => g.id === id);
+          if (foundGame) {
+            setGame(foundGame);
+          } else {
+            toast.error('Играта не е намерена');
+            navigate('/');
+          }
         }
-      } else {
-        toast.error('Играта не е намерена');
-        navigate('/');
+        setLoading(false);
       }
-      setLoading(false);
-    }
+    };
+    
+    loadGame();
   }, [id, navigate]);
 
   const handleFullscreen = () => {

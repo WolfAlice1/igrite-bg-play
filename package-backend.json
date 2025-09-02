@@ -1,0 +1,30 @@
+{
+  "name": "igrite-bg-backend",
+  "version": "1.0.0",
+  "description": "Backend API for игрите.bg game website",
+  "main": "dist/server/app.js",
+  "scripts": {
+    "start": "node dist/server/app.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server/app.ts",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongodb": "^6.3.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "ts-node-dev": "^2.0.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8"
+  },
+  "keywords": ["games", "mongodb", "express", "api"],
+  "author": "Your Name",
+  "license": "MIT"
+}

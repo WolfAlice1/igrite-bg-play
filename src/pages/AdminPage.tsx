@@ -52,14 +52,24 @@ export const AdminPage = () => {
     loadCategories();
   }, []);
 
-  const loadGames = () => {
-    const allGames = GameStorage.getAll();
-    setGames(allGames);
+  const loadGames = async () => {
+    try {
+      const allGames = await GameStorage.getAll();
+      setGames(allGames);
+    } catch (error) {
+      console.error('Error loading games:', error);
+      setGames(GameStorage.getAllLocal());
+    }
   };
 
-  const loadCategories = () => {
-    const allCategories = CategoryStorage.getAll();
-    setCategories(allCategories);
+  const loadCategories = async () => {
+    try {
+      const allCategories = await CategoryStorage.getAll();
+      setCategories(allCategories);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      setCategories(CategoryStorage.getAllLocal());
+    }
   };
 
   const handleSaveGame = () => {
