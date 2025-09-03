@@ -22,7 +22,13 @@ app.get('/health', (req, res) => {
 // Game routes
 app.get('/api/games', async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, search } = req.query;
+    
+    if (search) {
+      const games = await GameService.search(search as string);
+      return res.json(games);
+    }
+    
     const games = category ? 
       await GameService.getByCategory(category as string) : 
       await GameService.getAll();
@@ -73,6 +79,19 @@ app.delete('/api/games/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting game:', error);
     res.status(500).json({ error: 'Failed to delete game' });
+  }
+});
+
+app.post('/api/games/bulk-import', async (req, res) => {
+  try {
+    const games = req.body;
+    for (const game of games) {
+      await GameService.create(game);
+    }
+    res.status(201).json({ message: 'Games imported successfully' });
+  } catch (error) {
+    console.error('Error importing games:', error);
+    res.status(500).json({ error: 'Failed to import games' });
   }
 });
 

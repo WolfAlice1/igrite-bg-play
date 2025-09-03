@@ -50,6 +50,18 @@ export class GameService {
     await db.collection<GameDocument>(COLLECTION_NAME).deleteOne({ id });
   }
 
+  static async search(query: string): Promise<Game[]> {
+    const db = await connectDB();
+    const games = await db.collection<GameDocument>(COLLECTION_NAME).find({
+      $or: [
+        { title: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } },
+        { tags: { $regex: query, $options: 'i' } }
+      ]
+    }).toArray();
+    return games.map(this.documentToGame);
+  }
+
   private static documentToGame(doc: GameDocument): Game {
     const { _id, createdAt, updatedAt, ...game } = doc;
     return game;
