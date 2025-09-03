@@ -5,15 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:backend": "cd . && npm run dev --prefix . -f package-backend.json",
     "build": "vite build",
     "build:dev": "vite build --mode development",
-    "build:backend": "cd . && npm run build --prefix . -f package-backend.json",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -1,72 +1,17 @@
 version: '3.8'
 
 services:
-  # MongoDB Database
-  mongodb:
-    image: mongo:7.0
-    container_name: igrite-bg-mongodb
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
-      MONGO_INITDB_DATABASE: igrite-bg
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-      - ./mongo-init:/docker-entrypoint-initdb.d
-    networks:
-      - igrite-network
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # Backend API
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: igrite-bg-backend
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/igrite-bg?authSource=admin
-      - PORT=3001
-    ports:
-      - "3001:3001"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - igrite-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  # Frontend Application
   igrite-bg:
     build: .
-    container_name: igrite-bg-frontend
     ports:
       - "3000:80"
     restart: unless-stopped
+    container_name: igrite-bg-app
     environment:
       - NODE_ENV=production
-      - REACT_APP_API_URL=http://localhost:3001/api
     volumes:
       # Optional: mount a volume for nginx logs
       - ./logs:/var/log/nginx
-    depends_on:
-      backend:
-        condition: service_healthy
-    networks:
-      - igrite-network
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
@@ -74,12 +19,14 @@ services:
       retries: 3
       start_period: 40s
 
-# Define networks
-networks:
-  igrite-network:
-    driver: bridge
-
-# Define volumes
-volumes:
-  mongodb_data:
-    driver: local
+  # Optional: Add a reverse proxy with SSL if needed
+  # nginx-proxy:
+  #   image: nginxproxy/nginx-proxy
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  #     - ./certs:/etc/nginx/certs
+  #   environment:
+  #     - DEFAULT_HOST=igrite.bg

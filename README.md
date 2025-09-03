@@ -15,62 +15,24 @@
 
 ## 🚀 Стартиране
 
-### С Docker (препоръчително)
-
 ```bash
 # Клониране на проекта
 git clone <PROJECT_URL>
 cd igrite-bg
-
-# Стартиране на цялата система (MongoDB + Backend + Frontend)
-docker-compose up -d
-```
-
-Системата ще бъде достъпна на:
-- Frontend: `http://localhost:3000`
-- Backend API: `http://localhost:3001`
-- MongoDB: `localhost:27017`
-
-### Локално разработване
-
-```bash
-# Клониране на проекта
-git clone <PROJECT_URL>
-cd igrite-bg
-
-# Копиране на environment файла
-cp .env.example .env
 
 # Инсталиране на dependencies
 npm install
-
-# Стартиране на MongoDB (ако не използвате Docker)
-# Трябва да имате MongoDB инсталиран локално
-
-# Стартиране на backend сървъра
-npm run dev:backend
 
 # Стартиране в development mode
 npm run dev
 ```
 
-Frontend ще бъде достъпен на `http://localhost:8080`
-Backend API ще бъде достъпен на `http://localhost:3001`
+Сайтът ще бъде достъпен на `http://localhost:8080`
 
 ## 📁 Структура на проекта
 
 ```
 src/
-├── server/              # Backend Express сървър
-│   └── app.ts           # Главен backend файл
-├── services/            # Backend услуги
-│   ├── gameService.ts   # Game CRUD операции
-│   └── categoryService.ts # Category CRUD операции
-├── models/              # MongoDB модели
-│   ├── Game.ts          # Game модел
-│   └── Category.ts      # Category модел
-├── config/              # Конфигурация
-│   └── database.ts      # MongoDB връзка
 ├── components/          # React компоненти
 │   ├── GameCard.tsx     # Карта за игра
 │   ├── GameGrid.tsx     # Мрежа от игри
@@ -84,25 +46,6 @@ src/
 ├── utils/               # Utility функции
 │   └── gameStorage.ts   # JSON storage логика
 └── index.css           # Design system
-```
-
-## 🐳 Docker Commands
-
-```bash
-# Стартиране на всички услуги
-docker-compose up -d
-
-# Спиране на всички услуги
-docker-compose down
-
-# Преглед на логове
-docker-compose logs -f
-
-# Рестартиране на конкретна услуга
-docker-compose restart igrite-bg
-
-# Изтриване на всички данни (включително MongoDB)
-docker-compose down -v
 ```
 
 ## 🎮 Как да добавите игри
@@ -136,7 +79,6 @@ docker-compose down -v
 
 ## 🛠️ Технологии
 
-### Frontend
 - **React 18** - UI библиотека
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
@@ -145,13 +87,6 @@ docker-compose down -v
 - **shadcn/ui** - UI компоненти
 - **React Router** - Routing
 - **Sonner** - Toast notifications
-
-### Backend
-- **Node.js** - Runtime environment
-- **Express** - Web framework
-- **MongoDB** - Database
-- **TypeScript** - Type safety
-- **Docker** - Containerization
 
 ## 🎨 Design System
 
@@ -173,10 +108,6 @@ docker-compose down -v
 ## 🚧 Deployment
 
 ```bash
-# С Docker (препоръчително)
-docker-compose up -d
-
-# Или локално
 # Build за production
 npm run build
 
@@ -185,15 +116,6 @@ npm run preview
 ```
 
 Build файловете ще бъдат в `dist/` директорията.
-
-## 🔧 Environment Variables
-
-Копирайте `.env.example` към `.env` и конфигурирайте:
-
-- `MONGODB_URI` - MongoDB connection string
-- `REACT_APP_API_URL` - Backend API URL
-- `PORT` - Backend port (default: 3001)
-- `NODE_ENV` - Environment (development/production)
 
 ## 📝 License
 
