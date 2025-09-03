@@ -2,7 +2,7 @@ import { Game } from '@/types/game';
 
 // MongoDB-based storage implementation
 // This would be used with API calls to your backend
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export class GameStorage {
   static async getAll(): Promise<Game[]> {
