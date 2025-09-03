@@ -92,7 +92,7 @@ export class GameStorage {
 
   static async getByCategory(category: string): Promise<Game[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/games/category/${encodeURIComponent(category)}`);
+      const response = await fetch(`${API_BASE_URL}/games?category=${encodeURIComponent(category)}`);
       if (!response.ok) throw new Error('Failed to fetch games by category');
       return await response.json();
     } catch (error) {
@@ -103,7 +103,7 @@ export class GameStorage {
 
   static async search(query: string): Promise<Game[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/games/search/${encodeURIComponent(query)}`);
+      const response = await fetch(`${API_BASE_URL}/games?search=${encodeURIComponent(query)}`);
       if (!response.ok) throw new Error('Failed to search games');
       return await response.json();
     } catch (error) {

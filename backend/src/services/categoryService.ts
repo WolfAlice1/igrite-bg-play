@@ -1,5 +1,5 @@
-import { connectDB } from '@/config/database';
-import { Category, CategoryDocument } from '@/models/Category';
+import { connectDB } from '../config/database';
+import { Category, CategoryDocument } from '../models/Category';
 
 const COLLECTION_NAME = 'categories';
 
